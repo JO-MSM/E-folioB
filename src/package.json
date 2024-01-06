@@ -1,0 +1,11 @@
+{
+  "type": "module",
+  "scripts": {
+    "start": "node src/main.js"
+  },
+  "dependencies": {
+    "skySphere": "./Terrain/skySphere.mjs",
+    "rendering": "./Terrain/rendering.mjs",
+    "terrainGeneration": "./Terrain/terrainGeneration.mjs"
+  }
+}
