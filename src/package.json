@@ -4,8 +4,9 @@
     "start": "node src/main.js"
   },
   "dependencies": {
-    "skySphere": "./Terrain/skySphere.mjs",
     "rendering": "./Terrain/rendering.mjs",
-    "terrainGeneration": "./Terrain/terrainGeneration.mjs"
+    "skySphere": "./Terrain/skySphere.mjs",
+    "terrainGeneration": "./Terrain/terrainGeneration.mjs",
+    "three": "^0.160.0"
   }
 }
