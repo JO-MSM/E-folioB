@@ -1,36 +1,61 @@
-console.log("Check oppening file: createTerrainGeneration.mjs");
-import * as THREE from 'https://unpkg.com/three@0.124.0/build/three.module.js';
-//============================================================================
+/*
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 
-// Função para criar terreno usando Perlin Noise ///////////////////creio estar melhor//////////////
 // Função para criar terreno usando Perlin Noise
-function criarTerreno(tamanho, subdivisoes, config) {
-    const geometria = new THREE.PlaneGeometry(tamanho, tamanho, subdivisoes, subdivisoes);
-    const material = new THREE.MeshBasicMaterial({
-        color: config.cor,
-        wireframe: true
+function createTerrain(scene) {
+    //TODO Com o slider mudar o innerWidth
+    var geometry = new THREE.PlaneGeometry( window.innerWidth, window.innerHeight, 256, 256 );
+    var material = new THREE.MeshLambertMaterial({color: 0xE6EBED});
+    var terrain = new THREE.Mesh( geometry, material );
+    terrain.rotation.x = Math.PI / 2;
+    scene.add( terrain );
+
+    var peak = 60;
+    var vertices = terrain.geometry.attributes.position.array;
+    for (var i = 0; i <= vertices.length; i += 3) {
+        vertices[i+2] = peak * Math.random();
+    }
+    terrain.geometry.attributes.position.needsUpdate = true;
+    terrain.geometry.computeVertexNormals();
+}
+
+export { createTerrain };
+*/
+
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { SimplexNoise } from 'https://unpkg.com/three/examples/jsm/math/SimplexNoise.js';
+
+function createTerrain(scene) {
+    // TODO Com o slider mudar o innerWidth
+    const geometry = new THREE.PlaneGeometry(
+        window.innerWidth,
+        window.innerHeight,
+        512,
+        512);
+    const material = new THREE.MeshPhongMaterial({
+        color: 0xE6EBED,
     });
+    const terrain = new THREE.Mesh(geometry, material);
+    terrain.rotation.x = Math.PI / 4;
 
-    const vertices = geometria.vertices;
-    const perlin = new THREE.Vector3();
-    const escalaRuido = 0.1;
+    scene.add(terrain);
 
-    for (let i = 0; i < vertices.length; i += 3) {
-        const x = vertices[i];
-        const y = vertices[i + 1];
-        const z = vertices[i + 2];
+    // Gerar terreno usando o ruído Simplex
+    const simplexNoise = new SimplexNoise();
+   // const gaussianNoise = new THREE.Noise();
+    const vertices = terrain.geometry.attributes.position.array;
 
-        // Usar Perlin Noise para gerar a altura do terreno
-        perlin.set(x * escalaRuido, y * escalaRuido, z * escalaRuido);
-        vertices[i + 1] = THREE.MathUtils.mapLinear(Math.random(), 0, 1, -config.deformacao, config.deformacao);
+    for (let i = 0; i <= vertices.length; i += 3) {
+        // Gerar altura usando o ruído Simplex
+        const altura = simplexNoise.noise(vertices[i] / 100, vertices[i + 1] / 100) * 100;
 
-        // Ajustar a altura conforme necessário
-        vertices[i + 1] *= 2;
+        // Aplicar altura ao vértice
+        vertices[i + 2] = altura;
     }
 
-    geometria.computeFaceNormals();
-    geometria.computeVertexNormals();
-
-    return new THREE.Mesh(new THREE.BufferGeometry().fromGeometry(geometria), material);
+    // Atualizar geometria para refletir as alterações de altura
+    terrain.geometry.attributes.position.needsUpdate = true;
+    terrain.geometry.computeVertexNormals();
 }
-export {criarTerreno};
+
+export {createTerrain};

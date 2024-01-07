@@ -1,49 +1,42 @@
-//import {OrbitControls} from "https://unpkg.com/three@0.124.0/examples/jsm/controls/OrbitControls.js";
-
-console.log("Check oppening file: main.js");
 //============================================================================
+import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
-/* Ficheiros importandos de ./components */
-//import { createCamera } from "./Terrain/components/camera.mjs";
-//import { createScene } from "./Terrain/components/scene.mjs";
 //import { createTerrainCustomization } from "./Terrain/components/terrainCustomization.mjs"; /* Para criar terreno*/
-import {criarTerreno} from "./Terrain/terrainGeneration.mjs";
-
-/* Ficheiros importandos de ./systems */
-import { createRenderer} from "./Terrain/rendering.mjs";
+import {createTerrain} from "./Terrain/terrainGeneration.mjs";
+import {createControls} from "./Terrain/uiControls.mjs";
+import {createRenderer, render} from "./Terrain/rendering.mjs";
 import {CreateSkySphere} from "./Terrain/skySphere.mjs";
-import * as THREE from "https://unpkg.com/three@0.124.0/build/three.module.js";
 //import {addOns} from './Terrain/components/addOns.mjs';
 
-
-/* Variáveis que são específicas os modulos específicos, para que não sejam acedidos
-fora do módulo correspondente */
-
+var scene;
+var camera;
+var luzPontual;
 function main() {
-
-
-    /* Para selecionar a tag onde esta parte será apresentada */
     const container = document.querySelector('#scene-container');
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000 );
+    const values = new CreateSkySphere(scene, camera, luzPontual);
+    scene = values[0];
+    camera = values[1];
+    luzPontual = values[2];
 
-    let values = new CreateSkySphere();
-    let scene = values[0];
-    let camera = values[1];
+    createControls()
+    createTerrain(scene)
+   // terreno.receiveShadow=true;
 
-    const tamanhoTerreno = 10;
-    const subdivisoesTerreno = 100;
-    const terrainSettings = {
-        deformacao: 2,
-        cor: 0x00ff00
-    };
-    const terreno = criarTerreno(tamanhoTerreno, subdivisoesTerreno, terrainSettings);
-    scene.add(terreno);
+    createRenderer(container, scene, camera)
 
-    let renderer = createRenderer(scene, camera);
-    /* Para atualizar o container do index.html em main.js a partir da nova função criada em world */
-    container.append(renderer.domElement);
-
-    /* Para redemensionar cada função a cada momento que ocora alteração do global */
-    //const resizer = new Resizer(container, camera, renderer);
 }
 
+function animate() {
+    requestAnimationFrame( animate );
+    render( scene, camera, luzPontual );
+}
+
+
 main();
+animate();
